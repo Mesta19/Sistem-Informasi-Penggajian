@@ -1,69 +1,96 @@
-# CodeIgniter 4 Application Starter
+# Sistem Informasi Penggajian Karyawan (Sisfo Gaji)
 
-## What is CodeIgniter?
+Sistem Informasi Penggajian Karyawan berbasis web yang dirancang menggunakan framework **CodeIgniter 4** dan database **MySQL**. Sistem ini mendukung manajemen data karyawan, pengelolaan komponen gaji (tunjangan dan potongan), proses penggajian bulanan dinamis, cetak slip gaji dengan QR Code tanda tangan, serta alur pendaftaran mandiri (self-service) bagi karyawan untuk melengkapi data profil mereka.
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+---
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+## 📸 Demo Aplikasi
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+### 🖥️ Dashboard Admin
+![Dashboard Admin](DemoGit/Dashhboard%20admin.png)
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+### 📊 Daftar Karyawan
+![Daftar Karyawan](DemoGit/Daftar%20Karyawan.png)
 
-## Installation & updates
+### 💼 Manajemen Jabatan
+![Daftar Jabatan](DemoGit/Daftar%20jabatan.png)
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+### 💵 Komponen Gaji (Tunjangan & Potongan)
+![Komponen Gaji](DemoGit/Komponen%20gaji.png)
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+### 💰 Proses & Daftar Gaji
+![Daftar Gaji](DemoGit/Daftar%20gaji.png)
 
-## Setup
+### 🔑 Manajemen Akun & User
+![Daftar Akun](DemoGit/Daftar%20akun.png)
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+### 👤 Dashboard & Profil Karyawan (Self-Service)
+![Dashboard Karyawan](DemoGit/Dashboard%20Karyawan.png)
 
-## Important Change with index.php
+---
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+## 🚀 Fitur Utama
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+### 🔐 Autentikasi & Otorisasi (RBAC)
+* Pembatasan hak akses berbasis peran (**Admin** dan **Karyawan**).
+* Keamanan login yang tangguh dengan enkripsi password (hash) dan proteksi **CSRF (Cross-Site Request Forgery)** pada setiap form transaksi.
 
-**Please** read the user guide for a better explanation of how CI4 works!
+### 👥 Modul Administrator
+* **Dashboard Admin**: Ringkasan data statistik sistem (Total Karyawan Aktif, Total Pengeluaran Gaji, Jumlah Slip, Jumlah Jabatan).
+* **Data Karyawan**: Mengelola data dasar karyawan, melihat detail data profil, serta menetapkan jabatan karyawan langsung pada baris daftar tabel karyawan.
+* **Persetujuan Profil**: Memverifikasi pengisian data mandiri karyawan (Setuju/ACC atau Tolak dengan catatan revisi).
+* **Manajemen Jabatan**: Mengelola data jabatan dan nominal gaji pokok.
+* **Komponen Gaji**: Menentukan komponen tunjangan (penambah) dan potongan (pengurang) standar yang dinamis.
+* **Transaksi Penggajian**: Memproses hitung gaji karyawan per periode bulan/tahun dengan input kehadiran manual (Hadir, Sakit, Izin, Alpha) serta memilih komponen tunjangan/potongan secara fleksibel.
+* **Cetak Slip Gaji**: Mencetak slip gaji karyawan yang dilengkapi dengan snapshot data dinamis, perhitungan otomatis, dan QR Code verifikasi.
 
-## Repository Management
+### 👤 Modul Karyawan (Self-Service)
+* **Dashboard Karyawan**: Ringkasan data profil diri serta histori slip gaji yang pernah diproses.
+* **Pengisian Profil Mandiri**: Melengkapi informasi Nama Lengkap, NIK (16 digit), NPWP, nomor rekening bank, nomor telepon, dan alamat domisili untuk diajukan ke admin.
+* **Cetak Slip Mandiri**: Melihat histori slip gaji bulanan mereka dan mencetaknya secara mandiri.
 
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+---
 
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
+## 🛠️ Teknologi yang Digunakan
 
-## Server Requirements
+* **Backend Framework**: CodeIgniter 4
+* **Database**: MySQL / MariaDB
+* **Frontend**: HTML5, CSS3, JavaScript (Vanilla ES6), Bootstrap 4 (SB Admin 2 Template), SweetAlert2
+* **Server Environment**: XAMPP (Apache, PHP 8.1+)
 
-PHP version 8.2 or higher is required, with the following extensions installed:
+---
 
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
+## ⚙️ Panduan Instalasi & Penggunaan
 
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - The end of life date for PHP 8.1 was December 31, 2025.
-> - If you are still using below PHP 8.2, you should upgrade immediately.
-> - The end of life date for PHP 8.2 will be December 31, 2026.
+### 1. Prasyarat Sistem
+* PHP versi 8.1 ke atas (pastikan ekstensi `intl`, `mbstring`, `mysqli` aktif di `php.ini`).
+* MySQL/MariaDB.
 
-Additionally, make sure that the following extensions are enabled in your PHP:
+### 2. Klon / Salin Proyek
+Pindahkan folder proyek ini ke direktori server lokal Anda (misalnya `C:/xampp/htdocs/penggajian-serkom`).
 
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+### 3. Setup Database
+1. Buka phpMyAdmin atau client database MySQL Anda.
+2. Buat database baru bernama `penggajian_db`.
+3. Import file database yang berada di `/database/penggajian_db.sql`.
+
+### 4. Konfigurasi File `.env`
+Salin file `env` menjadi `.env` di root folder proyek, kemudian sesuaikan kredensial koneksi database Anda:
+```env
+database.default.hostname = localhost
+database.default.database = penggajian_db
+database.default.username = root
+database.default.password =
+database.default.DBDriver = MySQLi
+```
+
+### 5. Jalankan Server Pengembangan
+Buka terminal di root folder proyek, kemudian jalankan perintah Spark bawaan CI4:
+```bash
+php spark serve
+```
+Akses aplikasi melalui browser di tautan: **`http://localhost:8080`**
+
+### 6. Akun Login Bawaan (Default Admin)
+* **Username**: `admin`
+* **Password**: `admin123`
