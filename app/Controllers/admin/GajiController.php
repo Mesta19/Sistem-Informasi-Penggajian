@@ -125,4 +125,164 @@ class GajiController extends BaseController
             return redirect()->to('admin/gaji')->with('error', 'Gagal menghapus slip gaji.');
         }
     }
+
+    public function massal()
+    {
+        cekRole('Admin');
+        $karyawanModel = new KaryawanModel();
+        $komponenModel = new \App\Models\KomponenGajiModel();
+
+        $data['karyawan'] = $karyawanModel->select('karyawan.*, jabatan.nama_jabatan, jabatan.gaji_pokok')
+                                          ->join('jabatan', 'jabatan.id_jabatan = karyawan.id_jabatan', 'left')
+                                          ->where('karyawan.status', 'Aktif')
+                                          ->findAll();
+        $data['komponen'] = $komponenModel->findAll();
+
+        return view('admin/gaji/massal', $data);
+    }
+
+    public function prosesMassal()
+    {
+        cekRole('Admin');
+        $gajiModel = new GajiModel();
+        $db = \Config\Database::connect();
+
+        $bulan = (int)$this->request->getPost('bulan');
+        $tahun = (int)$this->request->getPost('tahun');
+        $karyawanInput = $this->request->getPost('karyawan') ?: [];
+
+        if (empty($bulan) || empty($tahun) || empty($karyawanInput)) {
+            return redirect()->back()->with('error', 'Parameter bulan, tahun, atau data karyawan tidak valid.')->withInput();
+        }
+
+        $sukses = 0;
+        $gagal = 0;
+        $pesanGagal = [];
+
+        $db->transStart();
+
+        foreach ($karyawanInput as $id_karyawan => $data) {
+            // Cek apakah karyawan dicentang untuk diproses
+            if (!isset($data['ikutkan']) || $data['ikutkan'] != 1) {
+                continue;
+            }
+
+            // Mencegah slip gaji tertimpa
+            $existing = $gajiModel->where('id_karyawan', $id_karyawan)
+                                  ->where('bulan', $bulan)
+                                  ->where('tahun', $tahun)
+                                  ->first();
+            if ($existing) {
+                continue;
+            }
+
+            // Ambil input kehadiran
+            $hari_hadir = (int)($data['hari_hadir'] ?? 0);
+            $hari_sakit = (int)($data['hari_sakit'] ?? 0);
+            $hari_izin = (int)($data['hari_izin'] ?? 0);
+            $hari_alpha = (int)($data['hari_alpha'] ?? 0);
+
+            // Ambil komponen pilihan & qty
+            $komponen_pilihan = isset($data['komponen_gaji']) ? (array)$data['komponen_gaji'] : [];
+            $qty_komponen = isset($data['qty_komponen']) ? (array)$data['qty_komponen'] : [];
+
+            try {
+                // Method prosesGaji akan update/insert
+                $gajiModel->prosesGaji(
+                    $id_karyawan,
+                    $bulan,
+                    $tahun,
+                    $komponen_pilihan,
+                    $qty_komponen,
+                    $hari_hadir,
+                    $hari_sakit,
+                    $hari_izin,
+                    $hari_alpha
+                );
+                $sukses++;
+            } catch (\Exception $e) {
+                $gagal++;
+                $pesanGagal[] = "KAR: {$id_karyawan} (" . $e->getMessage() . ")";
+            }
+        }
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan sistem, transaksi dibatalkan.')->withInput();
+        }
+
+        if ($sukses > 0 || $gagal > 0) {
+            $msg = "Proses gaji massal selesai. Sukses: {$sukses} karyawan.";
+            if ($gagal > 0) {
+                $msg .= " Gagal: {$gagal} karyawan. Detail error: " . implode(', ', $pesanGagal);
+                return redirect()->to('admin/gaji')->with('error', $msg);
+            }
+            return redirect()->to('admin/gaji')->with('success', $msg);
+        }
+
+        return redirect()->back()->with('error', 'Tidak ada karyawan yang dipilih untuk diproses.');
+    }
+
+    public function checkPembayaran()
+    {
+        cekRole('Admin');
+        $bulan = (int)$this->request->getPost('bulan');
+        $tahun = (int)$this->request->getPost('tahun');
+        $karyawanIds = $this->request->getPost('karyawan_ids') ?: [];
+
+        if (empty($bulan) || empty($tahun)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Bulan dan tahun wajib dipilih'
+            ]);
+        }
+
+        $gajiModel = new GajiModel();
+        $karyawanModel = new KaryawanModel();
+
+        // Get details of all checked or all active employees
+        $allKaryawan = $karyawanModel->where('status', 'Aktif')->findAll();
+        $karyawanMap = [];
+        foreach ($allKaryawan as $k) {
+            $karyawanMap[$k['id_karyawan']] = $k['nama_karyawan'];
+        }
+
+        $sudahBayar = [];
+        $belumBayar = [];
+
+        // If karyawanIds is empty, we check all active employees (e.g. for initial page load status)
+        $targetIds = !empty($karyawanIds) ? $karyawanIds : array_keys($karyawanMap);
+
+        if (!empty($targetIds)) {
+            $gajiList = $gajiModel->whereIn('id_karyawan', $targetIds)
+                                  ->where('bulan', $bulan)
+                                  ->where('tahun', $tahun)
+                                  ->findAll();
+
+            $paidIds = array_column($gajiList, 'id_karyawan');
+
+            foreach ($targetIds as $id) {
+                if (isset($karyawanMap[$id])) {
+                    $item = [
+                        'id_karyawan' => $id,
+                        'nama_karyawan' => $karyawanMap[$id]
+                    ];
+                    if (in_array($id, $paidIds)) {
+                        $sudahBayar[] = $item;
+                    } else {
+                        $belumBayar[] = $item;
+                    }
+                }
+            }
+        }
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'sudah_bayar' => $sudahBayar,
+            'belum_bayar' => $belumBayar,
+            'csrf_token' => csrf_token(),
+            'csrf_hash' => csrf_hash()
+        ]);
+    }
 }

@@ -46,6 +46,9 @@ $routes->group('admin', function($routes) {
 
     // Penggajian
     $routes->get('gaji', 'admin\GajiController::index');
+    $routes->get('gaji/massal', 'admin\GajiController::massal');
+    $routes->post('gaji/massal/proses', 'admin\GajiController::prosesMassal');
+    $routes->post('gaji/check-pembayaran', 'admin\GajiController::checkPembayaran');
     $routes->get('gaji/proses', 'admin\GajiController::proses');
     $routes->post('gaji/simpan', 'admin\GajiController::simpan');
     $routes->get('gaji/slip/(:num)', 'admin\GajiController::slip/$1');

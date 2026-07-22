@@ -5,9 +5,14 @@
 <!-- Page Heading -->
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">Daftar Gaji</h1>
-    <a href="<?= base_url('admin/gaji/proses') ?>" class="btn btn-sm btn-primary shadow-sm">
-        <i class="fas fa-cogs fa-sm text-white-50"></i> Proses Gaji Baru
-    </a>
+    <div>
+        <a href="<?= base_url('admin/gaji/massal') ?>" class="btn btn-sm btn-warning shadow-sm mr-2">
+            <i class="fas fa-cogs fa-sm text-white-50"></i> Proses Gaji Massal
+        </a>
+        <a href="<?= base_url('admin/gaji/proses') ?>" class="btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-cogs fa-sm text-white-50"></i> Proses Gaji Baru
+        </a>
+    </div>
 </div>
 
 <!-- Flash Messages -->
@@ -92,9 +97,8 @@
                     <tr>
                         <th>ID Gaji</th>
                         <th>Nama Karyawan</th>
+                        <th>Bulan Gaji</th>
                         <th>Gaji Pokok</th>
-                        <th>Tunjangan</th>
-                        <th>Potongan</th>
                         <th>Gaji Bersih</th>
                         <th>Tanggal Bayar</th>
                         <th>Aksi</th>
@@ -106,9 +110,8 @@
                             <tr>
                                 <td><?= esc($g['id_gaji']) ?></td>
                                 <td><?= esc($g['nama_karyawan']) ?></td>
+                                <td><?= date('F Y', mktime(0, 0, 0, $g['bulan'], 1, $g['tahun'])) ?></td>
                                 <td>Rp <?= number_format($g['gaji_pokok'], 2, ',', '.') ?></td>
-                                <td>Rp <?= number_format($g['total_tunjangan'], 2, ',', '.') ?></td>
-                                <td>Rp <?= number_format($g['total_potongan'], 2, ',', '.') ?></td>
                                 <td>Rp <?= number_format($g['gaji_bersih'], 2, ',', '.') ?></td>
                                 <td><?= esc($g['tanggal_bayar']) ?></td>
                                 <td>
@@ -123,7 +126,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="8" class="text-center">Belum ada data slip gaji untuk periode ini.</td>
+                            <td colspan="7" class="text-center">Belum ada data slip gaji untuk periode ini.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
